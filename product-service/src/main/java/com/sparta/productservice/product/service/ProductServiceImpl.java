@@ -4,11 +4,11 @@ import com.sparta.productservice.global.dto.ApiResponse;
 import com.sparta.productservice.global.exception.CustomException;
 import com.sparta.productservice.global.exception.ExceptionCode;
 import com.sparta.productservice.global.util.ApiResponseUtil;
-import com.sparta.productservice.product.dto.ProductImageInfoDto;
 import com.sparta.productservice.product.dto.ProductInfoDto;
 import com.sparta.productservice.product.dto.ProductOptionInfoDto;
 import com.sparta.productservice.product.dto.ProductSummaryDto;
 import com.sparta.productservice.product.entity.Product;
+import com.sparta.productservice.product.entity.ProductImage;
 import com.sparta.productservice.product.repository.ProductImageRepository;
 import com.sparta.productservice.product.repository.ProductOptionRepository;
 import com.sparta.productservice.product.repository.ProductRepository;
@@ -45,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public ApiResponse getProduct(Long productId) {
     Product product = findProduct(productId);
-    List<ProductImageInfoDto> productImageList = findProductImageList(productId);
+    List<ProductImage> productImageList = findProductImageList(product);
     List<ProductOptionInfoDto> productOptionList = findProductOptionList(productId);
     ProductInfoDto productInfo = ProductInfoDto.of(product, productImageList, productOptionList);
 
@@ -65,8 +65,8 @@ public class ProductServiceImpl implements ProductService {
     return productOptionRepository.findProductOptionList(productId);
   }
 
-  private List<ProductImageInfoDto> findProductImageList(Long productId) {
-    return productImageRepository.findProductImageList(productId);
+  private List<ProductImage> findProductImageList(Product product) {
+    return productImageRepository.findAllByProduct(product);
   }
 
   private Product findProduct(Long productId) {
