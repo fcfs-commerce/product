@@ -1,0 +1,11 @@
+package com.sparta.productservice.product.dto;
+
+import lombok.Getter;
+
+@Getter
+public class ProductImageInfoDto {
+
+  private Long productImageId;
+  private String url;
+
+}
