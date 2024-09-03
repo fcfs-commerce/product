@@ -34,11 +34,7 @@ public class OptionItem {
   @Column(name = "stock", nullable = false)
   private int stock;
 
-  public void deductStock(int quantity) {
-    this.stock -= quantity;
-  }
-
-  public void addStock(int quantity) {
+  public void updateStock(int quantity) {
     this.stock += quantity;
   }
 }

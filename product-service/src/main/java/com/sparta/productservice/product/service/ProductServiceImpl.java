@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -80,6 +81,15 @@ public class ProductServiceImpl implements ProductService {
     } else {
       return OptionItemDto.from(optionItem);
     }
+  }
+
+  @Override
+  @Transactional
+  public void updateOptionItemStock(Long optionItemId, int stock) {
+    OptionItem optionItem = optionItemRepository.findById(optionItemId)
+        .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
+
+    optionItem.updateStock(stock);
   }
 
   private List<ProductOptionInfoDto> findProductOptionList(Long productId) {

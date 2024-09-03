@@ -5,7 +5,9 @@ import com.sparta.productservice.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -26,4 +28,8 @@ public class ProductInternalController {
     return productService.findOptionItem(productId, null);
   }
 
+  @PutMapping("/optionItems/{optionItemId}")
+  public void updateOptionItemStock(@PathVariable Long optionItemId, @RequestParam int stock) {
+    productService.updateOptionItemStock(optionItemId, stock);
+  }
 }
