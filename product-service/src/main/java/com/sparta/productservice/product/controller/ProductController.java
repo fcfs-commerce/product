@@ -1,14 +1,9 @@
 package com.sparta.productservice.product.controller;
 
 import com.sparta.productservice.global.dto.ApiResponse;
-import com.sparta.productservice.product.dto.ProductInfoDto;
-import com.sparta.productservice.product.dto.ProductOptionInfoDto;
-import com.sparta.productservice.product.dto.ProductSummaryDto;
 import com.sparta.productservice.product.service.ProductService;
 import com.sparta.productservice.product.type.Category;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
