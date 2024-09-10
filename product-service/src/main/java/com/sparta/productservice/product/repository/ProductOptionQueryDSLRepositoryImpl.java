@@ -19,6 +19,7 @@ public class ProductOptionQueryDSLRepositoryImpl implements ProductOptionQueryDS
   @Override
   public List<ProductOptionInfoDto> findProductOptionList(Long productId) {
     return jpaQueryFactory.select(Projections.fields(ProductOptionInfoDto.class,
+                                                      optionItem.id.as("optionItemId"),
                                                       productOption.id.as("productOptionId"),
                                                       productOption.name))
         .from(optionItem)
