@@ -88,8 +88,8 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public ApiResponse getStock(Long productId, Long productOptionId) {
-    OptionItem optionItem = optionItemRepository.findByProductIdAndProductOptionId(productId, productOptionId)
+  public ApiResponse getStock(Long optionItemId) {
+    OptionItem optionItem = optionItemRepository.findById(optionItemId)
         .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
 
     OptionItemDto optionItemDto = OptionItemDto.from(optionItem);

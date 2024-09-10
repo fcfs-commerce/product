@@ -17,5 +17,5 @@ public interface ProductService {
 
   void updateOptionItemStock(Long optionItemId, int stock);
 
-  ApiResponse getStock(Long productId, Long productOptionId);
+  ApiResponse getStock(Long optionItemId);
 }
