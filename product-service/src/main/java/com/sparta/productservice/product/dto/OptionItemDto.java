@@ -1,7 +1,6 @@
 package com.sparta.productservice.product.dto;
 
 import com.sparta.productservice.product.entity.OptionItem;
-import java.util.Optional;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,11 +12,11 @@ public class OptionItemDto {
   private int stock;
   private int price;
 
-  public static OptionItemDto from(Optional<OptionItem> optionItem) {
+  public static OptionItemDto from(OptionItem optionItem) {
     return OptionItemDto.builder()
-        .optionItemId(optionItem.get().getId())
-        .stock(optionItem.get().getStock())
-        .price(optionItem.get().getProduct().getPrice())
+        .optionItemId(optionItem.getId())
+        .stock(optionItem.getStock())
+        .price(optionItem.getProduct().getPrice())
         .build();
   }
 }

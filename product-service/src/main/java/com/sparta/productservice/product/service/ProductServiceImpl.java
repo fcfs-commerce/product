@@ -69,17 +69,12 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public OptionItemDto findOptionItem(Long productId, Long productOptionId) {
-    Optional<OptionItem> optionItem;
-    if (productOptionId == null) {
-      optionItem = optionItemRepository.findByProductId(productId);
-    } else {
-      optionItem = optionItemRepository.findByProductIdAndProductOptionId(productId, productOptionId);
-    }
+    Optional<OptionItem> optionItem = optionItemRepository.findByProductIdAndProductOptionId(productId, productOptionId);
 
     if (optionItem.isEmpty()) {
       return null;
     } else {
-      return OptionItemDto.from(optionItem);
+      return OptionItemDto.from(optionItem.get());
     }
   }
 
@@ -90,6 +85,16 @@ public class ProductServiceImpl implements ProductService {
         .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
 
     optionItem.updateStock(stock);
+  }
+
+  @Override
+  public ApiResponse getStock(Long productId, Long productOptionId) {
+    OptionItem optionItem = optionItemRepository.findByProductIdAndProductOptionId(productId, productOptionId)
+        .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
+
+    OptionItemDto optionItemDto = OptionItemDto.from(optionItem);
+
+    return ApiResponseUtil.createSuccessResponse("Product stock loaded successfully.", optionItemDto);
   }
 
   private List<ProductOptionInfoDto> findProductOptionList(Long productId) {
