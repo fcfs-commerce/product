@@ -13,7 +13,7 @@ public interface ProductService {
 
   ApiResponse getProductOptions(Long productId);
 
-  OptionItemDto findOptionItem(Long productId, Long productOptionId);
+  OptionItemDto findOptionItem(Long optionItemId);
 
   void updateOptionItemStock(Long optionItemId, int stock);
 

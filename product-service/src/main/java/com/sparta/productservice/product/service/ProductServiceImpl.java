@@ -72,8 +72,8 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public OptionItemDto findOptionItem(Long productId, Long productOptionId) {
-    Optional<OptionItem> optionItem = optionItemRepository.findByProductIdAndProductOptionId(productId, productOptionId);
+  public OptionItemDto findOptionItem(Long optionItemId) {
+    Optional<OptionItem> optionItem = optionItemRepository.findById(optionItemId);
 
     if (optionItem.isEmpty()) {
       return null;

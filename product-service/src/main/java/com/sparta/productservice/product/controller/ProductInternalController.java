@@ -17,15 +17,9 @@ public class ProductInternalController {
 
   private final ProductService productService;
 
-  @GetMapping("/{productId}/option/{productOptionId}")
-  public OptionItemDto findOptionItemIdByProductIdAndProductOptionId(@PathVariable Long productId,
-      @PathVariable Long productOptionId) {
-    return productService.findOptionItem(productId, productOptionId);
-  }
-
-  @GetMapping("{productId}")
-  public OptionItemDto findOptionItemIdByProductId(@PathVariable Long productId) {
-    return productService.findOptionItem(productId, null);
+  @GetMapping("/optionItems/{optionItemId}")
+  public OptionItemDto findOptionItemById(@PathVariable Long optionItemId) {
+    return productService.findOptionItem(optionItemId);
   }
 
   @PutMapping("/optionItems/{optionItemId}")
