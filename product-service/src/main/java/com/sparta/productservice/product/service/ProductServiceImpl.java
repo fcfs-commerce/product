@@ -4,6 +4,7 @@ import com.sparta.productservice.global.dto.ApiResponse;
 import com.sparta.productservice.global.exception.CustomException;
 import com.sparta.productservice.global.exception.ExceptionCode;
 import com.sparta.productservice.global.util.ApiResponseUtil;
+import com.sparta.productservice.product.dto.ItemStockDto;
 import com.sparta.productservice.product.dto.OptionItemDto;
 import com.sparta.productservice.product.dto.ProductInfoDto;
 import com.sparta.productservice.product.dto.ProductOptionInfoDto;
@@ -15,7 +16,9 @@ import com.sparta.productservice.product.repository.OptionItemRepository;
 import com.sparta.productservice.product.repository.ProductImageRepository;
 import com.sparta.productservice.product.repository.ProductOptionRepository;
 import com.sparta.productservice.product.repository.ProductRepository;
+import com.sparta.productservice.product.repository.StockRepository;
 import com.sparta.productservice.product.type.Category;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
   private final ProductImageRepository productImageRepository;
   private final ProductOptionRepository productOptionRepository;
   private final OptionItemRepository optionItemRepository;
+  private final StockRepository stockRepository;
 
   @Override
   public ApiResponse getProducts(String sortBy, int page, int size, boolean isAsc,
@@ -89,12 +93,23 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public ApiResponse getStock(Long optionItemId) {
-    OptionItem optionItem = optionItemRepository.findById(optionItemId)
-        .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
+    String key = "OPTION_ITEM_ID:" + optionItemId;
 
-    OptionItemDto optionItemDto = OptionItemDto.from(optionItem);
+    String stockValue = stockRepository.getValueByKey(key);
+    int stock;
+    if (stockValue == null || Integer.parseInt(stockValue) == 0) {
+      OptionItem optionItem = optionItemRepository.findById(optionItemId)
+          .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
 
-    return ApiResponseUtil.createSuccessResponse("Product stock loaded successfully.", optionItemDto);
+      stock = optionItem.getStock();
+
+      stockRepository.setValue(key, String.valueOf(stock), Duration.ofMinutes(1));
+    } else {
+      stock = Integer.parseInt(stockValue);
+    }
+
+    ItemStockDto itemStockDto = ItemStockDto.of(optionItemId, stock);
+    return ApiResponseUtil.createSuccessResponse("The stock of the OptionItem "+optionItemId + " loaded successfully.", itemStockDto);
   }
 
   private List<ProductOptionInfoDto> findProductOptionList(Long productId) {
