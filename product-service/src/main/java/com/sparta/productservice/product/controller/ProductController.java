@@ -41,4 +41,10 @@ public class ProductController {
     ApiResponse apiResponse = productService.getProductOptions(productId);
     return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
   }
+
+  @GetMapping("/optionItem/{optionItemId}")
+  public ResponseEntity<ApiResponse> getStock(@PathVariable Long optionItemId) {
+    ApiResponse apiResponse = productService.getStock(optionItemId);
+    return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+  }
 }
