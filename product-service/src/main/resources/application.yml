@@ -14,8 +14,12 @@ spring:
         use_sql_comments: true
   data:
     redis:
-      host: localhost
-      port: 6379
+      master:
+        host: localhost
+        port: 6379
+      slave:
+        host: localhost
+        port: 6380
   application:
     name: product-service
 ---
