@@ -58,8 +58,7 @@ public class ProductServiceImpl implements ProductService {
     Pageable pageable = PageRequest.of(page, size, sort);
     Page<ProductSummaryDto> products = productRepository.findProducts(pageable, category);
 
-    ApiResponse apiResponse = ApiResponseUtil.createSuccessResponse("Products loaded successfully.", products);
-    return apiResponse;
+    return ApiResponseUtil.createSuccessResponse("Products loaded successfully.", products);
   }
 
   @Override
@@ -69,16 +68,14 @@ public class ProductServiceImpl implements ProductService {
     List<ProductOptionInfoDto> productOptionList = findProductOptionList(productId);
     ProductInfoDto productInfo = ProductInfoDto.of(product, productImageList, productOptionList);
 
-    ApiResponse apiResponse = ApiResponseUtil.createSuccessResponse("Product loaded successfully.", productInfo);
-    return apiResponse;
+    return ApiResponseUtil.createSuccessResponse("Product loaded successfully.", productInfo);
   }
 
   @Override
   public ApiResponse getProductOptions(Long productId) {
     List<ProductOptionInfoDto> productOptionList = findProductOptionList(productId);
 
-    ApiResponse apiResponse = ApiResponseUtil.createSuccessResponse("Product option list loaded successfully.", productOptionList);
-    return apiResponse;
+    return ApiResponseUtil.createSuccessResponse("Product option list loaded successfully.", productOptionList);
   }
 
   @Override
