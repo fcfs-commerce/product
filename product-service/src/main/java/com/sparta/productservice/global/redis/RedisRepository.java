@@ -18,4 +18,11 @@ public abstract class RedisRepository<K, V> {
     return redisTemplate.opsForValue().get(PREFIX + key);
   }
 
+  public void decreaseValue(K key, int amount) {
+    redisTemplate.opsForValue().decrement(PREFIX + key, amount);
+  }
+
+  public void increaseValue(String key, int amount) {
+    redisTemplate.opsForValue().increment(PREFIX + key, amount);
+  }
 }
