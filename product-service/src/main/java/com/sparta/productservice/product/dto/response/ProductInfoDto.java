@@ -1,4 +1,4 @@
-package com.sparta.productservice.product.dto;
+package com.sparta.productservice.product.dto.response;
 
 import com.sparta.productservice.product.entity.Product;
 import com.sparta.productservice.product.entity.ProductImage;

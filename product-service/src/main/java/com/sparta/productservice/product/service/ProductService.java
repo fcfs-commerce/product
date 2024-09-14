@@ -1,7 +1,7 @@
 package com.sparta.productservice.product.service;
 
 import com.sparta.productservice.global.dto.ApiResponse;
-import com.sparta.productservice.product.dto.OptionItemDto;
+import com.sparta.productservice.product.dto.response.OptionItemDto;
 import com.sparta.productservice.product.dto.request.HoldItemStockRequestDto;
 import com.sparta.productservice.product.type.Category;
 

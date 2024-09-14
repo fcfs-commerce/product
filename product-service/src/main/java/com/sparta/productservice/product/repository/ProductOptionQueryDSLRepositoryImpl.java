@@ -5,7 +5,7 @@ import static com.sparta.productservice.product.entity.QProductOption.productOpt
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sparta.productservice.product.dto.ProductOptionInfoDto;
+import com.sparta.productservice.product.dto.response.ProductOptionInfoDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
