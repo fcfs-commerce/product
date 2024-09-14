@@ -1,6 +1,7 @@
 package com.sparta.productservice.product.controller;
 
 import com.sparta.productservice.global.dto.ApiResponse;
+import com.sparta.productservice.product.dto.request.HoldItemStockRequestDto;
 import com.sparta.productservice.product.service.ProductService;
 import com.sparta.productservice.product.type.Category;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,9 +45,15 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
   }
 
-  @GetMapping("/optionItem/{optionItemId}")
+  @GetMapping("/optionItems/{optionItemId}/stock")
   public ResponseEntity<ApiResponse> getStock(@PathVariable Long optionItemId) {
     ApiResponse apiResponse = productService.getStock(optionItemId);
+    return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+  }
+
+  @PutMapping("/optionItems/stock-hold")
+  public ResponseEntity<ApiResponse> holdStock(@RequestBody HoldItemStockRequestDto requestDto) {
+    ApiResponse apiResponse = productService.holdStock(requestDto);
     return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
   }
 }

@@ -9,6 +9,8 @@ import com.sparta.productservice.product.dto.OptionItemDto;
 import com.sparta.productservice.product.dto.ProductInfoDto;
 import com.sparta.productservice.product.dto.ProductOptionInfoDto;
 import com.sparta.productservice.product.dto.ProductSummaryDto;
+import com.sparta.productservice.product.dto.request.HoldItemStockDto;
+import com.sparta.productservice.product.dto.request.HoldItemStockRequestDto;
 import com.sparta.productservice.product.entity.OptionItem;
 import com.sparta.productservice.product.entity.Product;
 import com.sparta.productservice.product.entity.ProductImage;
@@ -19,9 +21,13 @@ import com.sparta.productservice.product.repository.ProductRepository;
 import com.sparta.productservice.product.repository.StockRepository;
 import com.sparta.productservice.product.type.Category;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +45,10 @@ public class ProductServiceImpl implements ProductService {
   private final ProductOptionRepository productOptionRepository;
   private final OptionItemRepository optionItemRepository;
   private final StockRepository stockRepository;
+  private final RedissonClient redissonClient;
+
+  private final String STOCK_PREFIX = "OPTION_ITEM_ID:";
+  private final String STOCK_LOCK = "STOCK_LOCK";
 
   @Override
   public ApiResponse getProducts(String sortBy, int page, int size, boolean isAsc,
@@ -48,8 +58,7 @@ public class ProductServiceImpl implements ProductService {
     Pageable pageable = PageRequest.of(page, size, sort);
     Page<ProductSummaryDto> products = productRepository.findProducts(pageable, category);
 
-    ApiResponse apiResponse = ApiResponseUtil.createSuccessResponse("Products loaded successfully.", products);
-    return apiResponse;
+    return ApiResponseUtil.createSuccessResponse("Products loaded successfully.", products);
   }
 
   @Override
@@ -59,21 +68,19 @@ public class ProductServiceImpl implements ProductService {
     List<ProductOptionInfoDto> productOptionList = findProductOptionList(productId);
     ProductInfoDto productInfo = ProductInfoDto.of(product, productImageList, productOptionList);
 
-    ApiResponse apiResponse = ApiResponseUtil.createSuccessResponse("Product loaded successfully.", productInfo);
-    return apiResponse;
+    return ApiResponseUtil.createSuccessResponse("Product loaded successfully.", productInfo);
   }
 
   @Override
   public ApiResponse getProductOptions(Long productId) {
     List<ProductOptionInfoDto> productOptionList = findProductOptionList(productId);
 
-    ApiResponse apiResponse = ApiResponseUtil.createSuccessResponse("Product option list loaded successfully.", productOptionList);
-    return apiResponse;
+    return ApiResponseUtil.createSuccessResponse("Product option list loaded successfully.", productOptionList);
   }
 
   @Override
-  public OptionItemDto findOptionItem(Long productId, Long productOptionId) {
-    Optional<OptionItem> optionItem = optionItemRepository.findByProductIdAndProductOptionId(productId, productOptionId);
+  public OptionItemDto findOptionItem(Long optionItemId) {
+    Optional<OptionItem> optionItem = optionItemRepository.findById(optionItemId);
 
     if (optionItem.isEmpty()) {
       return null;
@@ -93,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public ApiResponse getStock(Long optionItemId) {
-    String key = "OPTION_ITEM_ID:" + optionItemId;
+    String key = STOCK_PREFIX + optionItemId;
 
     String stockValue = stockRepository.getValueByKey(key);
     int stock;
@@ -103,13 +110,63 @@ public class ProductServiceImpl implements ProductService {
 
       stock = optionItem.getStock();
 
-      stockRepository.setValue(key, String.valueOf(stock), Duration.ofMinutes(1));
+      stockRepository.setValue(key, String.valueOf(stock), Duration.ofMinutes(3));
     } else {
       stock = Integer.parseInt(stockValue);
     }
 
     ItemStockDto itemStockDto = ItemStockDto.of(optionItemId, stock);
     return ApiResponseUtil.createSuccessResponse("The stock of the OptionItem "+optionItemId + " loaded successfully.", itemStockDto);
+  }
+
+  @Override
+  public ApiResponse holdStock(HoldItemStockRequestDto requestDto) {
+    List<HoldItemStockDto> successDecreaseStock = new ArrayList<>();
+
+    RLock lock = redissonClient.getLock(STOCK_LOCK);
+
+    try {
+      // Lock 확득 시도
+      if (lock.tryLock(1000, 30, TimeUnit.SECONDS)) {
+        for (HoldItemStockDto item : requestDto.getHoldItemStockDtoList()) {
+          String key = STOCK_PREFIX + item.getOptionItemId();
+          String stockValue = stockRepository.getValueByKey(key);
+          int stock;
+          if (stockValue == null || Integer.parseInt(stockValue) == 0) {
+            OptionItem optionItem = optionItemRepository.findById(item.getOptionItemId())
+                .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
+
+            stock = optionItem.getStock();
+
+            stockRepository.setValue(key, String.valueOf(stock), Duration.ofMinutes(3));
+          } else {
+            stock = Integer.parseInt(stockValue);
+          }
+
+          if (stock < item.getQuantity()) {
+            throw CustomException.from(ExceptionCode.OUT_OF_STOCK);
+          }
+
+          stockRepository.decreaseValue(key, item.getQuantity());
+          successDecreaseStock.add(item);
+        }
+      } else {
+        throw CustomException.from(ExceptionCode.LOCK_ACQUISITION_FAILED);
+      }
+    } catch (CustomException e) {
+      // 재고 복구
+      for (HoldItemStockDto item : successDecreaseStock) {
+        String key = STOCK_PREFIX + item.getOptionItemId();
+        stockRepository.increaseValue(key, item.getQuantity());
+      }
+      throw e;
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } finally {
+      // 락 해제
+      lock.unlock();
+    }
+    return ApiResponseUtil.createSuccessResponse("Decrease stock successfully.", null);
   }
 
   private List<ProductOptionInfoDto> findProductOptionList(Long productId) {

@@ -26,6 +26,7 @@ public enum ExceptionCode {
   ALREADY_SHIPPED(HttpStatus.CONFLICT, "주문 취소는 발송 전까지만 가능합니다."),
   RETURN_NOT_ALLOWED(HttpStatus.CONFLICT, "반품은 배송 완료 상태만 가능합니다."),
   RETURN_PERIOD_EXPIRED(HttpStatus.CONFLICT, "반품 신청 가능 기간이 만료되었습니다."),
+  LOCK_ACQUISITION_FAILED(HttpStatus.CONFLICT, "락 획득에 실패했습니다."),
 
   // 500
   CREATE_MAIL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "메일 생성에 실패했습니다."),

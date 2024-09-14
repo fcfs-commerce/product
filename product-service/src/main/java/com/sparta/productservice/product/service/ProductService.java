@@ -2,6 +2,7 @@ package com.sparta.productservice.product.service;
 
 import com.sparta.productservice.global.dto.ApiResponse;
 import com.sparta.productservice.product.dto.OptionItemDto;
+import com.sparta.productservice.product.dto.request.HoldItemStockRequestDto;
 import com.sparta.productservice.product.type.Category;
 
 public interface ProductService {
@@ -13,9 +14,11 @@ public interface ProductService {
 
   ApiResponse getProductOptions(Long productId);
 
-  OptionItemDto findOptionItem(Long productId, Long productOptionId);
+  OptionItemDto findOptionItem(Long optionItemId);
 
   void updateOptionItemStock(Long optionItemId, int stock);
 
   ApiResponse getStock(Long optionItemId);
+
+  ApiResponse holdStock(HoldItemStockRequestDto requestDto);
 }
