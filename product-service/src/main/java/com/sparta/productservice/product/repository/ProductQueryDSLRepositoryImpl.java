@@ -9,7 +9,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sparta.productservice.product.dto.ProductSummaryDto;
+import com.sparta.productservice.product.dto.response.ProductSummaryDto;
 import com.sparta.productservice.product.entity.Product;
 import com.sparta.productservice.product.type.Category;
 import java.util.ArrayList;

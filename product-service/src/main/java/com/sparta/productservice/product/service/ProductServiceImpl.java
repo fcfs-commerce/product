@@ -4,11 +4,12 @@ import com.sparta.productservice.global.dto.ApiResponse;
 import com.sparta.productservice.global.exception.CustomException;
 import com.sparta.productservice.global.exception.ExceptionCode;
 import com.sparta.productservice.global.util.ApiResponseUtil;
-import com.sparta.productservice.product.dto.ItemStockDto;
-import com.sparta.productservice.product.dto.OptionItemDto;
-import com.sparta.productservice.product.dto.ProductInfoDto;
-import com.sparta.productservice.product.dto.ProductOptionInfoDto;
-import com.sparta.productservice.product.dto.ProductSummaryDto;
+import com.sparta.productservice.product.dto.request.UpdateItemStockDto;
+import com.sparta.productservice.product.dto.response.ItemStockDto;
+import com.sparta.productservice.product.dto.response.OptionItemDto;
+import com.sparta.productservice.product.dto.response.ProductInfoDto;
+import com.sparta.productservice.product.dto.response.ProductOptionInfoDto;
+import com.sparta.productservice.product.dto.response.ProductSummaryDto;
 import com.sparta.productservice.product.dto.request.HoldItemStockDto;
 import com.sparta.productservice.product.dto.request.HoldItemStockRequestDto;
 import com.sparta.productservice.product.entity.OptionItem;
@@ -90,15 +91,6 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  @Transactional
-  public void updateOptionItemStock(Long optionItemId, int stock) {
-    OptionItem optionItem = optionItemRepository.findById(optionItemId)
-        .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
-
-    optionItem.updateStock(stock);
-  }
-
-  @Override
   public ApiResponse getStock(Long optionItemId) {
     String key = STOCK_PREFIX + optionItemId;
 
@@ -167,6 +159,36 @@ public class ProductServiceImpl implements ProductService {
       lock.unlock();
     }
     return ApiResponseUtil.createSuccessResponse("Decrease stock successfully.", null);
+  }
+
+  @Override
+  @Transactional
+  public List<OptionItemDto> decreaseStock(List<UpdateItemStockDto> requestDto) {
+    List<OptionItemDto> optionItemDtoList = new ArrayList<>();
+    for (UpdateItemStockDto item : requestDto) {
+      OptionItem optionItem = optionItemRepository.findById(item.getOptionItemId())
+          .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
+
+      int quantity = item.getQuantity();
+      if (optionItem.getStock() < quantity) {
+        throw CustomException.from(ExceptionCode.OUT_OF_STOCK);
+      }
+
+      optionItem.updateStock((-1)* quantity);
+      optionItemDtoList.add(OptionItemDto.of(optionItem, quantity));
+    }
+    return optionItemDtoList;
+  }
+
+  @Override
+  @Transactional
+  public void increaseStock(List<UpdateItemStockDto> optionItemsIdList) {
+    for (UpdateItemStockDto item : optionItemsIdList) {
+      OptionItem optionItem = optionItemRepository.findById(item.getOptionItemId())
+          .orElseThrow(() -> CustomException.from(ExceptionCode.OPTION_ITEM_NOT_FOUND));
+
+      optionItem.updateStock(item.getQuantity());
+    }
   }
 
   private List<ProductOptionInfoDto> findProductOptionList(Long productId) {
